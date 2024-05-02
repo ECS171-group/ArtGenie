@@ -1,2 +1,2 @@
 matplotlib==3.8.4
-tensorflow==2.15.0
+tensorflow==2.16.1
