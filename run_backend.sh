@@ -7,7 +7,8 @@ cp src/requirements.txt src/requirements.txt.bak
 sed -i '/tensorflow/d' src/requirements.txt
 
 # Run the Docker command
-docker run -e HSA_OVERRIDE_GFX_VERSION=10.3.0 -it --network=host --device=/dev/kfd --device=/dev/dri --ipc=host --shm-size 16G --group-add video --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -v ./src:/app rocm/tensorflow:latest
+docker run -e HSA_OVERRIDE_GFX_VERSION=10.3.0 -it --network=host --device=/dev/kfd --device=/dev/dri --ipc=host --shm-size 16G --group-add video --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --workdir=/app --volume="$PWD"/src:/app rocm/tensorflow:latest /bin/bash -c "pip install -r requirements.txt; exec bash"
+
 
 # Restore the original requirements.txt
 mv src/requirements.txt.bak src/requirements.txt
