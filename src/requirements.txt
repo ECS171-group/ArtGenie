@@ -1,0 +1,15 @@
+cachetools==5.3.3
+certifi==2024.2.2
+charset-normalizer==3.3.2
+greenlet==3.0.3
+idna==3.7
+msgpack==1.0.8
+neovim==0.3.1
+proto-plus==1.23.0
+protobuf==4.25.3
+pyasn1==0.6.0
+pyasn1_modules==0.4.0
+pynvim==0.5.0
+requests==2.31.0
+rsa==4.9
+urllib3==2.2.1
