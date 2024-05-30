@@ -7,6 +7,10 @@ import sys
 import numpy as np
 import tensorflow as tf
 
+# Any line above this stroke length will be ignored. Any below will be
+# padded
+MAX_STROKE_LENGTH = 200
+
 def parse_line(ndjson_line):
     """Parse an ndjson line and return ink (as np array) and classname."""
     sample = json.loads(ndjson_line)
@@ -15,6 +19,9 @@ def parse_line(ndjson_line):
     inkarray = sample["drawing"]
     stroke_lengths = [len(stroke[0]) for stroke in inkarray]
     total_points = sum(stroke_lengths)
+    
+    # 3xN array containing N points of 2D coordinates, with third column
+    # being 1 if it's the end of a stroke, 0 otherwise.
     np_ink = np.zeros((total_points, 3), dtype=np.float32)
     current_t = 0
     for stroke in inkarray:
@@ -22,6 +29,7 @@ def parse_line(ndjson_line):
             np_ink[current_t:(current_t + len(stroke[0])), i] = stroke[i]
         current_t += len(stroke[0])
         np_ink[current_t - 1, 2] = 1  # stroke_end
+
     # Preprocessing.
     # 1. Size normalization.
     lower = np.min(np_ink[:, 0:2], axis=0)
@@ -73,6 +81,14 @@ def convert_data(trainingdata_dir,
                 num_per_class[class_name] += 1
                 if num_per_class[class_name] < offset:
                     continue
+
+                # Process ink
+                if len(ink) > MAX_STROKE_LENGTH:
+                    print(f"Skipping entry: {class_name} (Stroke length exceeded MAX_STROKE_LENGTH)")
+                    continue
+                ink = np.pad(ink, ((0, MAX_STROKE_LENGTH - len(ink)),
+                                   (0, 0)), mode="constant")
+
                 features = {}
                 features["class_index"] = tf.train.Feature(int64_list=tf.train.Int64List(value=[classnames.index(class_name)]))
                 features["ink"] = tf.train.Feature(float_list=tf.train.FloatList(value=ink.flatten()))

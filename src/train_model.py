@@ -1,9 +1,9 @@
 import argparse
 import json
 import os
-import random
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras import layers
 
 def parse_line(ndjson_line):
     """Parse an ndjson line and return ink (as np array) and classname."""
@@ -57,22 +57,31 @@ def load_dataset(tfrecord_dir, batch_size, shuffle=True, buffer_size=10000):
 
 def create_model(num_classes, learning_rate=0.001):
     """Create the drawing classification model."""
-    inputs = tf.keras.layers.Input(shape=(None, 3), dtype=tf.float32)
-    print("Input shape:", inputs.shape)  # Debug statement
+    # Simplified model by Eric
+    model = tf.keras.Sequential([
+        layers.Dense(512, activation="relu"),
+        layers.Dense(256, activation="relu"),
+        layers.Dense(128, activation="relu"),
+        layers.Dense(num_classes)
+    ])
 
-    reshape = tf.keras.layers.Reshape((-1, 1))(inputs)
-    print("Reshape shape:", reshape.shape)  # Debug statement
+    # Previous model by Ling
+    #model = tf.keras.Sequential([
+    #    layers.Conv1D(32, 5, activation="relu", padding="same"),
+    #    layers.Conv1D(64, 5, activation="relu", padding="same"),
+    #    layers.Conv1D(128, 3, activation="relu", padding="same"),
+    #    layers.Bidirectional(layers.LSTM(128, return_sequences=True)),
+    #    layers.Bidirectional(layers.LSTM(128)),
+    #    layers.Dense(512, activation="relu"),
+    #    layers.Dropout(0.5),
+    #    layers.Dense(num_classes)
+    #])
 
-    conv1 = tf.keras.layers.Conv1D(32, 5, activation="relu", padding="same")(reshape)
-    conv2 = tf.keras.layers.Conv1D(64, 5, activation="relu", padding="same")(conv1)
-    conv3 = tf.keras.layers.Conv1D(128, 3, activation="relu", padding="same")(conv2)
-    lstm1 = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(128, return_sequences=True))(conv3)
-    lstm2 = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(128))(lstm1)
-    dense1 = tf.keras.layers.Dense(512, activation="relu")(lstm2)
-    dropout = tf.keras.layers.Dropout(0.5)(dense1)
-    outputs = tf.keras.layers.Dense(num_classes)(dropout)
+    #inputs = tf.keras.layers.Input(shape=(None, 3), dtype=tf.float32)
+    #print("Input shape:", inputs.shape)  # Debug statement
 
-    model = tf.keras.Model(inputs=inputs, outputs=outputs)
+    #reshape = tf.keras.layers.Reshape((-1, 1))(inputs)
+    #print("Reshape shape:", reshape.shape)  # Debug statement
 
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
@@ -99,6 +108,13 @@ def train_and_evaluate(args):
         args.batch_size,
         shuffle=False
     )
+    print("Train dataset:")
+    # Take the first 3 elements from the dataset
+    subset = train_dataset.take(3)
+
+    # Iterate over the subset and print the elements
+    for element in subset:
+        print(element)
 
     num_classes = get_num_classes(os.path.join(args.trainingdata_dir, 'training.tfrecord.classes'))
 
