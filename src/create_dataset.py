@@ -49,7 +49,8 @@ def convert_data(trainingdata_dir,
 
     train_files = []
     for class_name in classnames:
-        class_files = tf.io.gfile.glob(os.path.join(trainingdata_dir, f"{class_name}.ndjson"))
+        class_files = tf.io.gfile.glob(os.path.join(trainingdata_dir,
+                                                    f"full_simplified_{class_name}.ndjson"))
         train_files.extend(class_files)
 
     num_per_class = {}
@@ -61,13 +62,13 @@ def convert_data(trainingdata_dir,
             for line in f:
                 ink, class_name, recognized = parse_line(line)  # Get recognized value from parse_line
                 if recognized_only and not recognized:  # Skip entries that are not correctly recognized if recognized_only is True
-                  # print(f"Skipping entry: {class_name} (Not recognized)")
+                    print(f"Skipping entry: {class_name} (Not recognized)")
                     continue
                 if class_name not in classnames:
-                  #  print(f"Skipping entry: {class_name} (Class not in classnames)")
+                    print(f"Skipping entry: {class_name} (Class not in classnames)")
                     continue
                 if num_per_class[class_name] >= observations_per_class:
-                  #  print(f"Skipping entry: {class_name} (Reached observations_per_class limit)")
+                    print(f"Skipping entry: {class_name} (Reached observations_per_class limit)")
                     continue
                 num_per_class[class_name] += 1
                 if num_per_class[class_name] < offset:
@@ -102,6 +103,7 @@ def main():
     with tf.io.gfile.GFile(args.classes_file, "r") as f:
         classnames = [x.strip() for x in f]
 
+    print(f"Found {len(classnames)} classes: {classnames}")
     if not os.path.exists(args.output_path):
         os.makedirs(args.output_path)
 
