@@ -8,6 +8,7 @@ def normalize_img(image, label):
     """Normalizes images: `uint8` -> `float32`."""
     return tf.cast(image, tf.float32) / 255., label
 
+print(train_images[0])
 ds_train = tf.data.Dataset.from_tensor_slices((train_images, train_labels))
 ds_train = ds_train.map(normalize_img, num_parallel_calls=tf.data.AUTOTUNE)
 ds_train = ds_train.cache()
