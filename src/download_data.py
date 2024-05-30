@@ -8,10 +8,10 @@ import os
 
 categories = ["apple", "banana", "blueberry", "watermelon"]
 # Tempaltes that convert categories into whatever they say
-url_template = "https://storage.cloud.google.com/quickdraw_dataset/sketchrnn/{}.npz"
-filename_template = "sketchrnn_{}.npz"
+url_template = "https://storage.cloud.google.com/quickdraw_dataset/full/simplified/{}.ndjson"
+filename_template = "full_simplified_{}.ndjson"
 
-data_directory = os.getcwd() + "/rnn_subset"
+data_directory = os.getcwd() + "/download"
 download_directory = os.path.expanduser('~/Downloads')
 
 #os.rename('source_file', 'destination_file')
