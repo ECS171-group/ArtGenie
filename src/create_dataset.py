@@ -2,7 +2,6 @@ import argparse
 import json
 import os
 import random
-import sys
 
 import numpy as np
 import tensorflow as tf
@@ -76,8 +75,8 @@ def convert_data(trainingdata_dir,
                     print(f"Skipping entry: {class_name} (Class not in classnames)")
                     continue
                 if num_per_class[class_name] >= observations_per_class:
-                    print(f"Skipping entry: {class_name} (Reached observations_per_class limit)")
-                    continue
+                    print(f"Skipping entry: {class_name} (Reached observations_per_class limit); Going to next file.")
+                    break
                 num_per_class[class_name] += 1
                 if num_per_class[class_name] < offset:
                     continue
@@ -92,7 +91,9 @@ def convert_data(trainingdata_dir,
                 features = {}
                 features["class_index"] = tf.train.Feature(int64_list=tf.train.Int64List(value=[classnames.index(class_name)]))
                 features["ink"] = tf.train.Feature(float_list=tf.train.FloatList(value=ink.flatten()))
-                features["shape"] = tf.train.Feature(int64_list=tf.train.Int64List(value=ink.shape))
+                if ink.shape[0] != 200:
+                    print(f"Weird ink shape: {ink.shape}")  # Debug print
+                features["shape"] = tf.train.Feature(int64_list=tf.train.Int64List(value=(200,3)))
                 f = tf.train.Features(feature=features)
                 example = tf.train.Example(features=f)
                 writers[random.randint(0, output_shards - 1)].write(example.SerializeToString())

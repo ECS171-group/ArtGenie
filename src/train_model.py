@@ -36,12 +36,12 @@ def load_dataset(tfrecord_dir, batch_size, shuffle=True, buffer_size=10000):
     def _parse_tfexample(example_proto):
         """Parse a single TFExample."""
         feature_description = {
-            "ink": tf.io.VarLenFeature(tf.float32),
+            "ink": tf.io.FixedLenFeature([200,3],tf.float32),
             "class_index": tf.io.FixedLenFeature([], tf.int64),
             "shape": tf.io.FixedLenFeature([2], tf.int64)
         }
         parsed_features = tf.io.parse_single_example(example_proto, feature_description)
-        ink = tf.sparse.to_dense(tf.sparse.reshape(parsed_features["ink"], parsed_features["shape"]))
+        ink = parsed_features["ink"]
         class_index = parsed_features["class_index"]
         return ink, class_index
 
@@ -52,41 +52,23 @@ def load_dataset(tfrecord_dir, batch_size, shuffle=True, buffer_size=10000):
     dataset = dataset.map(_parse_tfexample)
     if shuffle:
         dataset = dataset.shuffle(buffer_size=buffer_size)
-    dataset = dataset.padded_batch(batch_size, padded_shapes=([None, 3], []))
+    dataset = dataset.padded_batch(batch_size, padded_shapes=([200, 3], []))
     return dataset
 
 def create_model(num_classes, learning_rate=0.001):
     """Create the drawing classification model."""
-    # Simplified model by Eric
     model = tf.keras.Sequential([
+        layers.Input(shape=(200, 3)),
+        layers.Flatten(),
         layers.Dense(512, activation="relu"),
         layers.Dense(256, activation="relu"),
         layers.Dense(128, activation="relu"),
-        layers.Dense(num_classes)
+        layers.Dense(num_classes, activation="sigmoid"),
     ])
-
-    # Previous model by Ling
-    #model = tf.keras.Sequential([
-    #    layers.Conv1D(32, 5, activation="relu", padding="same"),
-    #    layers.Conv1D(64, 5, activation="relu", padding="same"),
-    #    layers.Conv1D(128, 3, activation="relu", padding="same"),
-    #    layers.Bidirectional(layers.LSTM(128, return_sequences=True)),
-    #    layers.Bidirectional(layers.LSTM(128)),
-    #    layers.Dense(512, activation="relu"),
-    #    layers.Dropout(0.5),
-    #    layers.Dense(num_classes)
-    #])
-
-    #inputs = tf.keras.layers.Input(shape=(None, 3), dtype=tf.float32)
-    #print("Input shape:", inputs.shape)  # Debug statement
-
-    #reshape = tf.keras.layers.Reshape((-1, 1))(inputs)
-    #print("Reshape shape:", reshape.shape)  # Debug statement
-
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                  loss=tf.keras.losses.SparseCategoricalCrossentropy(),
                   metrics=["accuracy"])
-
+    print(model.summary())
     return model
 
 def get_num_classes(classes_file):
@@ -108,13 +90,6 @@ def train_and_evaluate(args):
         args.batch_size,
         shuffle=False
     )
-    print("Train dataset:")
-    # Take the first 3 elements from the dataset
-    subset = train_dataset.take(3)
-
-    # Iterate over the subset and print the elements
-    for element in subset:
-        print(element)
 
     num_classes = get_num_classes(os.path.join(args.trainingdata_dir, 'training.tfrecord.classes'))
 
@@ -141,7 +116,9 @@ def train_and_evaluate(args):
 
     # Train the model
     print("Starting training...")
+    
     model.fit(train_dataset,
+              batch_size=args.batch_size,
               epochs=args.num_epochs,
               validation_data=eval_dataset,
               callbacks=[checkpoint_callback, tensorboard_callback])
