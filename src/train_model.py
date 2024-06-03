@@ -72,8 +72,8 @@ def create_model_mlp(num_classes, learning_rate=0.001):
     print(model.summary())
     return model
 
-# Very bad -- essentially random guess
-def create_model_rnn(num_classes, learning_rate=0.001):
+# Also good
+def create_model_cnn(num_classes, learning_rate=0.001):
     """Create the drawing classification model using RNN with LSTM layers."""
     model = tf.keras.Sequential([
         layers.Input(shape=(200, 3)),
@@ -119,7 +119,7 @@ def train_and_evaluate(args):
 
     # Create model
     print("Creating model...")
-    model = create_model_rnn(num_classes, args.learning_rate)
+    model = create_model_cnn(num_classes, args.learning_rate)
 
     # Set up callbacks
     checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
