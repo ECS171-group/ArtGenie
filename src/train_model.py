@@ -3,7 +3,7 @@ import json
 import os
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras import layers
+from tensorflow.keras import layers, regularizers
 
 def parse_line(ndjson_line):
     """Parse an ndjson line and return ink (as np array) and classname."""
@@ -55,7 +55,8 @@ def load_dataset(tfrecord_dir, batch_size, shuffle=True, buffer_size=10000):
     dataset = dataset.padded_batch(batch_size, padded_shapes=([200, 3], []))
     return dataset
 
-def create_model(num_classes, learning_rate=0.001):
+# Good
+def create_model_mlp(num_classes, learning_rate=0.001):
     """Create the drawing classification model."""
     model = tf.keras.Sequential([
         layers.Input(shape=(200, 3)),
@@ -71,6 +72,27 @@ def create_model(num_classes, learning_rate=0.001):
     print(model.summary())
     return model
 
+# Very bad -- essentially random guess
+def create_model_rnn(num_classes, learning_rate=0.001):
+    """Create the drawing classification model using RNN with LSTM layers."""
+    model = tf.keras.Sequential([
+        layers.Input(shape=(200, 3)),
+        layers.Conv1D(filters=64, kernel_size=5, activation='relu', padding='same'),
+        #layers.MaxPooling1D(pool_size=2),
+        layers.Conv1D(filters=128, kernel_size=5, activation='relu', padding='same'),
+        #layers.MaxPooling1D(pool_size=2),
+        layers.Conv1D(filters=256, kernel_size=5, activation='relu', padding='same'),
+        #layers.MaxPooling1D(pool_size=2),
+        layers.Flatten(),
+        layers.Dense(128, activation='relu'),
+        layers.Dense(num_classes, activation='sigmoid')
+    ])
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+                  loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+                  metrics=["accuracy"])
+    print(model.summary())
+    return model
+
 def get_num_classes(classes_file):
     with open(classes_file, 'r') as f:
         classes = [line.strip() for line in f]
@@ -79,23 +101,25 @@ def get_num_classes(classes_file):
 def train_and_evaluate(args):
     """Train and evaluate the model."""
 
-    print("Loading train dataset...")
+    print()
+    print(f"Loading train dataset from {args.trainingdata_dir}...")
     train_dataset = load_dataset(
         args.trainingdata_dir,
         args.batch_size
     )
-    print("Loading eval dataset...")
+    print(f"Loading eval dataset from {args.eval_data_dir}...")
     eval_dataset = load_dataset(
         args.eval_data_dir,
         args.batch_size,
         shuffle=False
     )
+    print()
 
     num_classes = get_num_classes(os.path.join(args.trainingdata_dir, 'training.tfrecord.classes'))
 
     # Create model
     print("Creating model...")
-    model = create_model(num_classes, args.learning_rate)
+    model = create_model_rnn(num_classes, args.learning_rate)
 
     # Set up callbacks
     checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
