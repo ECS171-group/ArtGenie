@@ -21,6 +21,10 @@ train_cnn_1='python train_model.py --trainingdata_dir data/final512data --eval_d
 # more epoch
 train_cnn_1='python train_model.py --trainingdata_dir data/final512data --eval_data_dir data/final512data --output_dir data/final512output --job-dir data/final512job --num_epochs 20 --batch_size 10 --learning_rate 0.001 --model_type cnn'
 
+# Best model by grid search
+train_best='python train_model.py --trainingdata_dir data/final512data --eval_data_dir data/final512data --output_dir data/final512output --job-dir data/final512job --num_epochs 20 --batch_size 32 --learning_rate 0.001 --model_type cnn'
+
+
 train_cmd=$train_cnn_1
 echo $train_cmd
 read -r -p 'Run command? ' yn
