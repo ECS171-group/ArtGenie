@@ -6,12 +6,12 @@
 import webbrowser
 import os
 
-categories = ["apple", "banana", "blueberry", "watermelon"]
+categories = ["apple", "banana", "hot dog", "grapes", "donut"]
 # Tempaltes that convert categories into whatever they say
 url_template = "https://storage.cloud.google.com/quickdraw_dataset/full/simplified/{}.ndjson"
 filename_template = "full_simplified_{}.ndjson"
 
-data_directory = os.getcwd() + "/download"
+data_directory = os.getcwd() + "/data/download"
 download_directory = os.path.expanduser('~/Downloads')
 
 #os.rename('source_file', 'destination_file')

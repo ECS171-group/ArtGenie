@@ -106,6 +106,18 @@ def create_model_cnn(num_classes, learning_rate=0.001):
     print(model.summary())
     return model
 
+# For direct use
+
+
+def create_model_with_type(num_classes, learning_rate=0.001,
+                           model_type='mlp'):
+    if model_type == 'mlp':
+        return create_model_mlp(num_classes, learning_rate)
+    else:
+        return create_model_cnn(num_classes, learning_rate)
+
+# For grid search
+
 
 def create_model_wrapper(num_classes):
     def create_model(learning_rate=0.001, model_type='mlp'):
@@ -134,7 +146,6 @@ def convert_to_numpy(dataset):
         features.shape[0], features.shape[2], features.shape[3])
     return np.array(features), np.array(labels)
 
-
 def perform_grid_search(train_dataset_dir, num_classes,
                         result_filepath=None):
     model = KerasClassifier(
@@ -151,12 +162,12 @@ def perform_grid_search(train_dataset_dir, num_classes,
         'batch_size': [32, 64],
         'epochs': [10, 20]
     }
-    #param_grid = {
+    # param_grid = {
     #    'learning_rate': [0.01, 0.001],  # Reduced to one value
     #    'model_type': ['mlp'],    # Reduced to one value
     #    'batch_size': [32],       # Reduced to one value
     #    'epochs': [10]            # Reduced to one value
-    #}
+    # }
 
     grid = GridSearchCV(
         estimator=model, param_grid=param_grid, n_jobs=-1, cv=3)
@@ -182,6 +193,16 @@ def perform_grid_search(train_dataset_dir, num_classes,
     for mean, stdev, param in zip(means, stds, params):
         print(f"{mean} ({stdev}) with: {param}")
 
+def save_model_spec(args, output_dir):
+    """ Save the model specified by the argument in a JSON file."""
+    model_spec = {
+        "model_type": args.model_type,
+        "learning_rate": args.learning_rate,
+        "batch_size": args.batch_size,
+        "num_epochs": args.num_epochs
+    }
+    with open(os.path.join(output_dir, "model_spec.json"), "w") as f:
+        json.dump(model_spec, f)
 
 def train_and_evaluate(args):
     """Train and evaluate the model."""
@@ -205,7 +226,8 @@ def train_and_evaluate(args):
 
     # Create model
     print("Creating model...")
-    model = create_model_mlp(num_classes, args.learning_rate)
+    model = create_model_with_type(num_classes, args.learning_rate,
+                                   args.model_type)
 
     # Set up callbacks
     checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
@@ -243,25 +265,26 @@ def train_and_evaluate(args):
 
     # Save the trained model
     print("Saving model...")
-    model.save(os.path.join(args.job_dir, "model"))
+    model.save(os.path.join(args.job_dir, "model.keras"))
 
 
 def main(args):
-    # Set up output directory
+    # Set up directories
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
 
     # TODO: Pick task <05-06-24, Eric Xu> #
 
     # Train and evaluate
-    # train_and_evaluate(args)
+    train_and_evaluate(args)
+    save_model_spec(args, args.output_dir)
 
     # Perform grid search
-    perform_grid_search(args.trainingdata_dir,
-                        get_num_classes(os.path.join(args.trainingdata_dir,
-                                                     'training.tfrecord.classes')),
-                        os.path.join(args.output_dir,
-                                     'grid_search_results.json'))
+    # perform_grid_search(args.trainingdata_dir,
+    #                    get_num_classes(os.path.join(args.trainingdata_dir,
+    #                                                 'training.tfrecord.classes')),
+    #                    os.path.join(args.output_dir,
+    #                                 'grid_search_results.json'))
 
 
 if __name__ == "__main__":
@@ -280,6 +303,8 @@ if __name__ == "__main__":
                         help="Batch size for training and evaluation.")
     parser.add_argument("--learning_rate", type=float, default=0.001,
                         help="Learning rate for the optimizer.")
+    parser.add_argument("--model_type", type=str, default="mlp",
+                        help="Type of model to use (mlp or cnn).")
 
     args = parser.parse_args()
     main(args)

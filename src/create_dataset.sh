@@ -13,9 +13,10 @@ if [[ "$#" -ne 0 ]]; then
     exit 1
 fi
 
-echo 'python create_dataset.py --recognized_only --ndjson_path data/download --output_path data/final512data --classes_file data/subset2.txt --train_observations_per_class 512 --eval_observations_per_class 128'
+cmd="python create_dataset.py --recognized_only --ndjson_path data/download --output_path data/final512data --classes_file data/classes.txt --train_observations_per_class 512 --eval_observations_per_class 128"
+echo $cmd
 read -r -p 'Run command? ' yn
 if [[ "$yn" != 'y' ]]; then
     exit 0
 fi
-python create_dataset.py --recognized_only --ndjson_path data/download --output_path data/final512data --classes_file data/classes.txt --train_observations_per_class 512 --eval_observations_per_class 128
+eval $cmd
