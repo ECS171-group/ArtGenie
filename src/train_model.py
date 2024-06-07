@@ -280,11 +280,11 @@ def main(args):
     save_model_spec(args, args.output_dir)
 
     # Perform grid search
-    # perform_grid_search(args.trainingdata_dir,
-    #                    get_num_classes(os.path.join(args.trainingdata_dir,
-    #                                                 'training.tfrecord.classes')),
-    #                    os.path.join(args.output_dir,
-    #                                 'grid_search_results.json'))
+    #perform_grid_search(args.trainingdata_dir,
+    #                   get_num_classes(os.path.join(args.trainingdata_dir,
+    #                                                'training.tfrecord.classes')),
+    #                   os.path.join(args.output_dir,
+    #                                'grid_search_results.json'))
 
 
 if __name__ == "__main__":
