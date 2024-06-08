@@ -1,17 +1,197 @@
-<!-- Template given by flask_tutorial -->
+<!--
+Template for the main page of the Quick Draw web app.
+
+Code for drawing on canvas is from:
+https://stackoverflow.com/questions/2368784/draw-on-html5-canvas-using-a-mouse
+-->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Machine Learning Classification Project</title>
-</head>
-<body>
-    <h1>Machine Learning Classification Project</h1>
-    <form method="POST" action="/predict">
-        <label for="input">Enter data to classify:</label>
-        <input type="text" name="input" id="input" required>
-        <br>
-        <button type="submit">Predict</button>
-    </form>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Art Genie</title>
+
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+  <script type="text/javascript">
+    var canvas,
+      ctx,
+      flag = false,
+      prevX = 0,
+      currX = 0,
+      prevY = 0,
+      currY = 0,
+      dot_flag = false;
+    var strokes = [];
+    var x = "black",
+      y = 2;
+
+    function init() {
+      canvas = document.getElementById("can");
+      ctx = canvas.getContext("2d");
+      w = canvas.width;
+      h = canvas.height;
+
+      canvas.addEventListener(
+        "mousemove",
+        function (e) {
+          findxy("move", e);
+        },
+        false
+      );
+      canvas.addEventListener(
+        "mousedown",
+        function (e) {
+          findxy("down", e);
+        },
+        false
+      );
+      canvas.addEventListener(
+        "mouseup",
+        function (e) {
+          findxy("up", e);
+        },
+        false
+      );
+      canvas.addEventListener(
+        "mouseout",
+        function (e) {
+          findxy("out", e);
+        },
+        false
+      );
+    }
+
+    function color(obj) {
+      x = "black";
+    }
+
+    function draw() {
+      ctx.beginPath();
+      ctx.moveTo(prevX, prevY);
+      ctx.lineTo(currX, currY);
+      ctx.strokeStyle = x;
+      ctx.lineWidth = y;
+      ctx.stroke();
+      ctx.closePath();
+    }
+
+    function erase() {
+      ctx.clearRect(0, 0, w, h);
+      strokes = [];
+      document.getElementById("canvasimg").style.display = "none";
+    }
+
+    function save() {
+      console.log("here are the strokes");
+      console.log(strokes);
+      var dataURL = JSON.stringify(strokes);
+      console.log(dataURL);
+      while (dataURL.indexOf("[") >= 0) {
+        dataURL = dataURL.replace("[", ".");
+      }
+      while (dataURL.indexOf("]") >= 0) {
+        dataURL = dataURL.replace("]", "_");
+      }
+      while (dataURL.indexOf(",") >= 0) {
+        dataURL = dataURL.replace(",", "-");
+      }
+
+      window.location.href = "/go?data=" + dataURL;
+    }
+
+    function findxy(res, e) {
+      if (res == "down") {
+        prevX = currX;
+        prevY = currY;
+        currX = e.clientX - canvas.offsetLeft;
+        currY = e.clientY - canvas.offsetTop;
+        strokes.push([[], []]);
+        flag = true;
+        dot_flag = true;
+        if (dot_flag) {
+          ctx.beginPath();
+          ctx.fillStyle = x;
+          ctx.fillRect(currX, currY, 2, 2);
+          ctx.closePath();
+          dot_flag = false;
+        }
+      }
+      if (res == "up" || res == "out") {
+        minimumX = 256;
+        minimumY = 256;
+        for (stroke in strokes) {
+          var strokeX = stroke[0];
+          var strokeY = stroke[1];
+          for (x in strokeX) {
+            if (x <= minimumX) {
+              minimumX == x;
+            }
+          }
+        }
+
+        console.log(strokes);
+        flag = false;
+      }
+      if (res == "move") {
+        if (flag) {
+          prevX = currX;
+          prevY = currY;
+          currX = e.clientX - canvas.offsetLeft;
+          currY = e.clientY - canvas.offsetTop;
+          draw();
+          strokes[strokes.length - 1][0].push(currX);
+          strokes[strokes.length - 1][1].push(currY);
+        }
+      }
+    }
+  </script>
+
+  <body onload="init()">
+    <div class="jumbotron">
+      <h2 class="text-center">Art Genie - ECS 171</h2>
+      <p class="text-center">
+        Try to draw one of the following in the box and hit predict:
+      </p>
+      <b> <p class="text-center">Apple, Banana, Grape, Hot Dog, Donut</p></b>
+    </div>
+
+    <div class="row justify-content-center">
+      <canvas
+        id="can"
+        width="256"
+        height="256"
+        style="border: 2px solid; margin: 20px"
+      ></canvas>
+    </div>
+
+    <!-- For pred message -->
+    {% block message %} {% endblock %}
+
+    <div class="row justify-content-center" id="buttons">
+      <input
+        class="btn btn-secondary col-md-1"
+        type="button"
+        value="Predict"
+        onclick="save()"
+      />
+
+      <input
+        class="btn btn-secondary col-md-1 ml-5"
+        type="button"
+        value="Restart"
+        onclick="erase()"
+      />
+    </div>
+
+    {% block body %} {% endblock %}
+  </body>
 </html>

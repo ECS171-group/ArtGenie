@@ -1,0 +1,58 @@
+{% extends "index.html" %} {% block title %}Results{% endblock %} {% block
+    message %}
+    <div class="row justify-content-center">
+      <div class="alert alert-info ml-5 col-10" role="alert">
+        <h4 class="alert-heading" align="center">Prediction: {{result}}</h4>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-1"></div>
+      {% for id in ids %}
+      <div class="col-5 ">
+        <div id="{{id}}"></div>
+      </div>
+      {% endfor %}
+      <div class="col-1" ></div>
+      <div class="col-5">
+        <img id="canvasimg" style="display: none" />
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-3">
+        <button
+          type="button"
+          class="btn btn-secondary btn-lg btn-block"
+          onClick="location.href='../'"
+        >
+          Back to drawing
+        </button>
+      </div>
+    </div>
+    {% endblock %} {% block body %}
+    <script type="text/javascript">
+      // render plot with probabilities for each class
+      const graphs = {{graphJSON | safe}};
+      const ids = {{ids | safe}};
+      for(let i in graphs) {
+          Plotly.plot(ids[i], graphs[i].data, graphs[i].layout, {staticPlot: true});
+      }
+      console.log('graphs rendered');
+    </script>
+    
+    <script type="text/javascript">
+      var x = document.getElementById("can");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+      } else {
+        x.style.display = "none";
+      }
+    
+      var x = document.getElementById("buttons");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+      } else {
+        x.style.display = "none";
+      }
+    </script>
+    {% endblock %}
+    
