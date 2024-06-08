@@ -22,11 +22,11 @@ train_cnn_1='python train_model.py --trainingdata_dir data/final512data --eval_d
 train_cnn_1='python train_model.py --trainingdata_dir data/final512data --eval_data_dir data/final512data --output_dir data/final512output --job-dir data/final512job --num_epochs 20 --batch_size 10 --learning_rate 0.001 --model_type cnn'
 
 # Best model by grid search
-train_best='python train_model.py --trainingdata_dir data/final512data --eval_data_dir data/final512data --output_dir data/final512output --job-dir data/final512job --num_epochs 20 --batch_size 64 --learning_rate 0.001 --model_type cnn'
-train_best_mlp='python train_model.py --trainingdata_dir data/final512data --eval_data_dir data/final512data --output_dir data/final512output --job-dir data/final512job --num_epochs 20 --batch_size 32 --learning_rate 0.01 --model_type mlp'
+train_best='python train_model.py --trainingdata_dir data/final512data --eval_data_dir data/final512data --output_dir data/final512output --job-dir data/final512job --num_epochs 20 --batch_size 32 --learning_rate 0.001 --model_type cnn'
+train_best_mlp='python train_model.py --trainingdata_dir data/final512data --eval_data_dir data/final512data --output_dir data/final512output --job-dir data/final512job --num_epochs 20 --batch_size 32 --learning_rate 0.001 --model_type mlp'
 train_costly='python train_model.py --trainingdata_dir data/final512data --eval_data_dir data/final512data --output_dir data/final512output --job-dir data/final512job --num_epochs 40 --batch_size 32 --learning_rate 0.001 --model_type cnn'
 
-train_cmd=$train_best
+train_cmd=$train_best_mlp
 echo $train_cmd
 read -r -p 'Run command? ' yn
 if [[ "$yn" != 'y' ]]; then
