@@ -276,15 +276,15 @@ def main(args):
     # TODO: Pick task <05-06-24, Eric Xu> #
 
     # Train and evaluate
-    train_and_evaluate(args)
-    save_model_spec(args, args.output_dir)
+    #train_and_evaluate(args)
+    #save_model_spec(args, args.output_dir)
 
     # Perform grid search
-    #perform_grid_search(args.trainingdata_dir,
-    #                   get_num_classes(os.path.join(args.trainingdata_dir,
-    #                                                'training.tfrecord.classes')),
-    #                   os.path.join(args.output_dir,
-    #                                'grid_search_results.json'))
+    perform_grid_search(args.trainingdata_dir,
+                       get_num_classes(os.path.join(args.trainingdata_dir,
+                                                    'training.tfrecord.classes')),
+                       os.path.join(args.output_dir,
+                                    'grid_search_results.json'))
 
 
 if __name__ == "__main__":
