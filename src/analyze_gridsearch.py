@@ -47,7 +47,7 @@ def analyze_score_time(df):
 def boxplot_mlp_vs_cnn(df):
     """Generate a boxplot comparing MLP and CNN accuracy and fit time."""
     # Accuracy
-    df['mean_test_score'] = df['mean_test_score'] * 100  # Ensure accuracy is in percentage
+    df['mean_test_score'] = df['mean_test_score']  # Ensure accuracy is in percentage
     df.boxplot(column='mean_test_score', by='param_model_type', grid=False)
     plt.title('Model Accuracy Comparison')
     plt.suptitle('')  # Suppress the default title to make it look cleaner
@@ -66,7 +66,6 @@ def boxplot_mlp_vs_cnn(df):
 def boxplot_learningrate(df):
     """Generate a boxplot comparing different learning rate's accuracy
     and fit time."""
-    df['mean_test_score'] = df['mean_test_score'] * 100  # Ensure accuracy is in percentage
     df.boxplot(column='mean_test_score', by='param_learning_rate', grid=False)
     plt.title('Learning Rate Accuracy Comparison')
     plt.suptitle('')  # Suppress the default title to make it look cleaner
@@ -80,9 +79,6 @@ def boxplot_learningrate(df):
     plt.xlabel('Learning Rate')
     plt.ylabel('Fit Time (seconds)')
     plt.show()
-
-def boxplot_fit_time(df):
-    """Generate a boxplot comparing MLP and CNN fit time."""
 
 
 def main(args):
