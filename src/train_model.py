@@ -228,6 +228,7 @@ def train_and_evaluate(args):
     print("Creating model...")
     model = create_model_with_type(num_classes, args.learning_rate,
                                    args.model_type)
+    exit(1)
 
     # Set up callbacks
     checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
